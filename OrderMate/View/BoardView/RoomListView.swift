@@ -1,19 +1,11 @@
-//
-//  RoomView.swift
-//  OrderMate
-//
-//  Created by 문영균 on 2023/03/06.
-//
-
 import SwiftUI
 
 struct RoomListView: View {
     @Binding var LoginState: Bool
-    @State var roomList = RoomList()
+    @State private var showing = false
+    @State var roomList = BoardViewModel()
     @State var title = ""
-    @State var listJsonArray: [RoomInfoPreview] = [RoomInfoPreview(postId: 99,
-                                                             title: "개설된 방이 없습니다",
-                                                             content: "")]
+    @State var listJsonArray: [RoomInfoPreview] = [RoomInfoPreview(postId: 99, title: "개설된 방이 없습니다", content: "")]
     var body: some View {
         ZStack{
             NavigationStack {
@@ -21,11 +13,18 @@ struct RoomListView: View {
                     HStack {
                         Spacer()
                         Button {
-                            LoginState = false
+                            showing = true
                         } label: {
                             Text("logout button")
                                 .bold()
-                        }.padding()
+                        }
+                        .alert("로그아웃 하시겠습니까?", isPresented: $showing) {
+                            Button("yes", action: {LoginState=false} )
+                            Button("cancel", role: .cancel){}
+                           
+                           
+                        }
+                        .padding()
                     }
                     Button {
                         roomList.GetAllRoomList { success, data in
@@ -38,7 +37,7 @@ struct RoomListView: View {
                     List {
                         ForEach(listJsonArray, id: \.self) { data in
                             NavigationLink {
-                                BoardView(postId: data.postId!)
+                                BoardView2(postId: data.postId!)
                             } label: {
                                 Text(String(data.postId!))
                                 Text(data.title!)

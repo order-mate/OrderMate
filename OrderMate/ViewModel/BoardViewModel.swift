@@ -1,61 +1,23 @@
 //
-//  RoomStruct.swift
+//  BoardViewModel.swift
 //  OrderMate
 //
-//  Created by 문영균 on 2023/03/06.
+//  Created by 문영균 on 2023/03/20.
 //
 
 import Foundation
 
-
-struct Room: Hashable, Identifiable, Codable {
-    var id: String
-    var title: String
-    var location: String
-    var date: Date
-    var maxUser: Int
-    var userList: [String] = []
-}
-
-struct CreatRoom: Codable {
-    var title: String
-    var maxPeopleNum: String
-    var isAnonymous: Int?
-    var spaceType: String?
-    var content: String
-    var withOrderLink: String?
-    var pickupSpace: String?
-    var accountNum: String?
-    var estimatedOrdTime: String?
-   
-}
-
-struct RoomInfo: Decodable {
-    let postId : Int?
-    let title : String?
-    let createdAt : Date?
-    let postStatus : String?
-    let maxPeopleNum : Int?
-    let currentPeopleNum : Int?
-    let isAnonymous : Bool?
-    let content : String?
-    let withOrderLink : String?
-    let pickupSpace : String?
-    let spaceType : String?
-    let accountNum : String?
-    let estimatedOrderTime : Date?
-    let ownerId : Int?
-    let ownerName : String?
-}
-
-struct RoomInfoPreview: Codable, Hashable {
-    let postId : Int?
-    let title : String?
-    let content : String?
-}
-
-
-struct RoomList {
+class BoardViewModel: ObservableObject {
+    static var shared = BoardViewModel()
+    @Published var board: BoardModel?
+    
+     init() {
+        //리뷰 필요
+        getBoard(postId: 1) { isComplete in
+        }
+    }
+    
+    //모든 리스트 정보 받아오기
     func GetAllRoomList(completionHandler: @escaping (Bool, Any) -> Void) {
         print("모든 리스트 정보 가져오기")
         if let url = URL(string: "http://localhost:8080/post") {
@@ -93,6 +55,54 @@ struct RoomList {
         }
     }
     
+    //특정 게시물 받아오기
+    func getBoard(postId: Int, completion: @escaping (Bool) -> Void) {
+        let url = URL(string: urlString + APIModel.post.rawValue + "/" + String(postId))
+        
+        var request = URLRequest(url: url!)
+        request.httpMethod = "GET"
+        
+        let task = URLSession.shared.dataTask(with: request) { data, response, error in
+            let successRange = 200..<300
+            guard error == nil, let statusCode = (response as? HTTPURLResponse)?.statusCode, successRange.contains(statusCode) else {
+                print()
+                print("Error occur: \(String(describing: error)) error code: \((response as? HTTPURLResponse)?.statusCode)")
+                completion(false)
+                return
+            }
+            guard let data = data else {
+                print("invalid data")
+                completion(false)
+                return
+            }
+            let decoder = JSONDecoder()
+            
+            do {
+                let response = try decoder.decode(BoardModel.self, from: data)
+                DispatchQueue.main.async {
+                    self.board = response
+                    completion(true)
+                }
+            } catch {
+                print("error occured.")
+            }
+            
+            let getSuccess = 200
+            if getSuccess == (response as? HTTPURLResponse)?.statusCode {
+                print("게시글 정보 get 성공")
+                print(response as Any)
+                completion(true)
+                
+            } else {
+                print("게시글 정보 get 실패")
+                print(response as Any)
+                completion(false)
+            }
+        }
+        task.resume()
+    }
+    
+    //게시글 생성하기
     func UploadData(title:String, maxPeopleNum:String, isAnonymous:Int,
                     spaceType:String, content:String, withOrderLink:String,
                     pickupSpace:String, accountNum:String, estimatedOrdTime:String

@@ -1,13 +1,6 @@
-//
-//  BoardStruct.swift
-//  OrderMate
-//
-//  Created by 문영균 on 2023/03/15.
-//
-
 import Foundation
 
-struct Board: Codable {
+struct BoardModel: Codable {
     var ownerName: String? = nil
     var title: String
     var createdAt: Date? = nil
@@ -23,5 +16,5 @@ struct Board: Codable {
 //    var estimatedOrderTime: Date? = nil
 //    var participationList: [String: String]? = nil
     var commentList: [String]? = nil
-    
+
 }

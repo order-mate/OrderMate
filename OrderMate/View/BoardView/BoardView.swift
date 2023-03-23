@@ -7,7 +7,7 @@
 
 import SwiftUI
 
-struct BoardView: View {
+struct BoardView2: View {
     var postId: Int
     @State private var isComplete: Bool = false
     @StateObject var manager: BoardViewModel = BoardViewModel.shared
@@ -147,9 +147,9 @@ struct BoardView: View {
     }
 }
 
-struct BoardView_Previews: PreviewProvider {
+struct BoardView2_Previews: PreviewProvider {
     var postId = 1
     static var previews: some View {
-        BoardView(postId: 1)
+        BoardView2(postId: 1)
     }
 }
